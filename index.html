@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DISPATCH-OPS Disaster Response Command</title>
+    <meta name="description" content="Tactical operational dashboard for disaster response units to log incoming distress calls, dispatch relief vehicles and medical teams, track live resources, request backup forces, and monitor real-time sector emergency status." />
+    <meta property="og:title" content="DISPATCH-OPS Disaster Response Command" />
+    <meta property="og:description" content="Tactical operational dashboard for disaster response units to log incoming distress calls, dispatch relief vehicles and medical teams, track live resources, request backup forces, and monitor real-time sector emergency status." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <!-- TOP BAR (3-Zone Tactical Command Contract) -->
+    <header class="top-header">
+      <!-- Zone 1: Brand & Status Wordmark -->
+      <div class="brand-zone">
+        <div class="radar-beacon" title="Live Dispatch Link Connected"></div>
+        <div class="brand-title">
+          DISPATCH-OPS
+          <span class="brand-kicker">DRU COMMAND</span>
+        </div>
+        <div class="clock-display tabular-nums" id="mission-clock">--:--:-- UTC</div>
+      </div>
+
+      <!-- Zone 2: Telemetry Metrics Summary -->
+      <div class="header-telemetry" aria-label="Incident Summary Metrics">
+        <div class="telemetry-item">
+          <span class="telemetry-label">Active Calls</span>
+          <span class="telemetry-value tabular-nums" id="stat-active-count">0</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">Critical Tier</span>
+          <span class="telemetry-value critical tabular-nums" id="stat-critical-count">0</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">Units Fielded</span>
+          <span class="telemetry-value deployed tabular-nums" id="stat-deployed-count">0</span>
+        </div>
+        <div class="telemetry-item">
+          <span class="telemetry-label">Resolved</span>
+          <span class="telemetry-value resolved tabular-nums" id="stat-resolved-count">0</span>
+        </div>
+      </div>
+
+      <!-- Zone 3: Command Actions -->
+      <div class="header-actions">
+        <button class="btn btn-secondary" id="btn-quick-sample" title="Simulate a new incoming distress call">
+          + Inbound Call
+        </button>
+        <button class="btn btn-secondary" id="btn-reset-scenario" title="Reset scenario data to default crisis state">
+          Reset Data
+        </button>
+        <button class="btn btn-backup" id="btn-open-backup-modal">
+          Call Backup Forces
+        </button>
+      </div>
+    </header>
+
+    <!-- MAIN DASHBOARD VIEWPORT -->
+    <main class="dashboard-deck">
+      <!-- LEFT COLUMN: INTAKE & INVENTORY DECK -->
+      <aside class="deck-column">
+        <!-- PANEL 1: INCIDENT LOGGING INTAKE FORM -->
+        <section class="deck-panel" aria-labelledby="form-heading">
+          <div class="panel-header">
+            <h2 class="panel-title" id="form-heading">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+              </svg>
+              Distress Call Intake
+            </h2>
+            <span class="panel-title-badge">LOGGING SYSTEM</span>
+          </div>
+
+          <div class="panel-body">
+            <!-- Preset Scenario Quick Fill -->
+            <div class="form-presets">
+              <span class="form-label" style="align-self: center; font-size: 10px;">Presets:</span>
+              <button type="button" class="btn-preset" data-preset="flash-flood">Flash Flood</button>
+              <button type="button" class="btn-preset" data-preset="roof-rescue">Roof Evac</button>
+              <button type="button" class="btn-preset" data-preset="medical-crisis">Critical Trauma</button>
+              <button type="button" class="btn-preset" data-preset="cargo-drop">Supply Cutoff</button>
+            </div>
+
+            <form id="incident-form" class="form-grid">
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="caller-name">Caller / Agency</label>
+                  <input type="text" id="caller-name" class="form-input" placeholder="e.g. Sgt. Ramirez or Resident" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="caller-contact">Contact Phone</label>
+                  <input type="tel" id="caller-contact" class="form-input tabular-nums" placeholder="555-0149" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="incident-location">Incident Location / Landmark</label>
+                <input type="text" id="incident-location" class="form-input" placeholder="e.g. 420 North Riverside Ave, Pier 7" required />
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="incident-sector">Tactical Sector</label>
+                  <select id="incident-sector" class="form-select" required>
+                    <option value="Alpha">Sector Alpha (Riverfront Basin)</option>
+                    <option value="Bravo">Sector Bravo (Metro Central)</option>
+                    <option value="Charlie">Sector Charlie (Industrial Port)</option>
+                    <option value="Delta">Sector Delta (Highland Bluffs)</option>
+                    <option value="Echo">Sector Echo (Transit Interchange)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="incident-needs">Specific Resource Need</label>
+                  <select id="incident-needs" class="form-select" required>
+                    <option value="paramedics">Paramedic Response Team</option>
+                    <option value="rescueVehicles">Amphibious / 4x4 Rescue Vehicle</option>
+                    <option value="heavyAirSupport">Supply Truck / Helicopter</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Severity Selector -->
+              <div class="form-group">
+                <span class="form-label">Severity Level</span>
+                <div class="urgency-selector">
+                  <label class="urgency-radio-label">
+                    <input type="radio" name="severity" value="critical" checked />
+                    <div class="urgency-box critical">Critical</div>
+                  </label>
+                  <label class="urgency-radio-label">
+                    <input type="radio" name="severity" value="high" />
+                    <div class="urgency-box high">High</div>
+                  </label>
+                  <label class="urgency-radio-label">
+                    <input type="radio" name="severity" value="moderate" />
+                    <div class="urgency-box moderate">Moderate</div>
+                  </label>
+                  <label class="urgency-radio-label">
+                    <input type="radio" name="severity" value="low" />
+                    <div class="urgency-box low">Low</div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="incident-notes">Specific Needs & Situation Summary</label>
+                <textarea id="incident-notes" class="form-textarea" placeholder="Describe victim count, hazards, trapped individuals, and access conditions..." required></textarea>
+              </div>
+
+              <button type="submit" class="btn btn-primary" id="btn-submit-incident" style="width: 100%; padding: 10px; margin-top: 4px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Log Emergency Incident
+              </button>
+            </form>
+          </div>
+        </section>
+
+        <!-- PANEL 2: RESOURCE INVENTORY & ALLOCATION CONTROL -->
+        <section class="deck-panel" aria-labelledby="inventory-heading">
+          <div class="panel-header">
+            <h2 class="panel-title" id="inventory-heading">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
+              </svg>
+              Live Resource Inventory
+            </h2>
+            <span class="panel-title-badge">DISPATCH CONTROL</span>
+          </div>
+
+          <div class="panel-body">
+            <div class="inventory-list" id="inventory-list-container">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </div>
+        </section>
+      </aside>
+
+      <!-- RIGHT COLUMN: SECTOR MAP, VISUALIZERS, & INCIDENT FEED -->
+      <section class="deck-column">
+        <!-- PANEL 3: INTERACTIVE SVG TACTICAL SECTOR MAP -->
+        <section class="deck-panel" aria-labelledby="map-heading">
+          <div class="panel-header">
+            <h2 class="panel-title" id="map-heading">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+                <line x1="8" y1="2" x2="8" y2="18"></line>
+                <line x1="16" y1="6" x2="16" y2="22"></line>
+              </svg>
+              Tactical Emergency Sector Map
+            </h2>
+            <span class="panel-title-badge" id="map-sector-filter-badge">ALL SECTORS VIEW</span>
+          </div>
+
+          <div class="map-container">
+            <!-- Scalable Pure SVG Map -->
+            <svg class="tactical-svg" viewBox="0 0 820 380" id="tactical-map" role="img" aria-label="Disaster tactical sector grid map">
+              <defs>
+                <!-- Radar Radial Gradient -->
+                <radialGradient id="radar-glow" cx="50%" cy="50%" r="50%">
+                  <stop offset="0%" stop-color="#0284c7" stop-opacity="0.1" />
+                  <stop offset="100%" stop-color="#0284c7" stop-opacity="0" />
+                </radialGradient>
+              </defs>
+
+              <!-- Radar Atmosphere -->
+              <rect width="820" height="380" fill="#060a12" />
+              <circle cx="410" cy="190" r="170" fill="url(#radar-glow)" />
+
+              <!-- Tactical Grid Lines -->
+              <g class="map-grid-layer">
+                <line x1="40" y1="190" x2="780" y2="190" class="map-grid-line" />
+                <line x1="410" y1="20" x2="410" y2="360" class="map-grid-line" />
+                <circle cx="410" cy="190" r="90" fill="none" class="map-grid-line" />
+                <circle cx="410" cy="190" r="170" fill="none" class="map-grid-line" />
+              </g>
+
+              <!-- Sector Interactive Polygons -->
+              <g id="sector-polygons">
+                <!-- Sector Alpha: Riverfront Basin -->
+                <polygon points="40,20 280,20 260,200 40,200" class="map-sector-fill" data-sector="Alpha" />
+                <!-- Sector Bravo: Metro Central -->
+                <polygon points="280,20 540,20 520,200 260,200" class="map-sector-fill" data-sector="Bravo" />
+                <!-- Sector Charlie: Industrial Port -->
+                <polygon points="540,20 780,20 780,200 520,200" class="map-sector-fill" data-sector="Charlie" />
+                <!-- Sector Delta: Highland Bluffs -->
+                <polygon points="40,200 390,200 370,360 40,360" class="map-sector-fill" data-sector="Delta" />
+                <!-- Sector Echo: Transit Corridor -->
+                <polygon points="390,200 780,200 780,360 370,360" class="map-sector-fill" data-sector="Echo" />
+              </g>
+
+              <!-- Sector Boundaries -->
+              <line x1="270" y1="20" x2="260" y2="200" class="map-sector-boundary" />
+              <line x1="530" y1="20" x2="520" y2="200" class="map-sector-boundary" />
+              <line x1="40" y1="200" x2="780" y2="200" class="map-sector-boundary" />
+              <line x1="380" y1="200" x2="370" y2="360" class="map-sector-boundary" />
+
+              <!-- Flood Plain & River Hazard Layer -->
+              <path d="M 60,30 Q 180,90 280,110 T 520,130 T 760,80" class="map-flood-zone" />
+              <path d="M 50,30 Q 180,90 280,110 T 520,130 T 770,80" class="map-river" />
+
+              <!-- Main Arterial Evac Highway -->
+              <path d="M 70,340 Q 240,280 410,210 T 750,290" class="map-highway" />
+
+              <!-- Sector Identifier Labels -->
+              <text x="55" y="45" class="map-sector-label">SEC-ALPHA // RIVERFRONT</text>
+              <text x="295" y="45" class="map-sector-label">SEC-BRAVO // METRO CTR</text>
+              <text x="555" y="45" class="map-sector-label">SEC-CHARLIE // PORT</text>
+              <text x="55" y="225" class="map-sector-label">SEC-DELTA // HIGHLAND</text>
+              <text x="405" y="225" class="map-sector-label">SEC-ECHO // TRANSIT</text>
+
+              <!-- Dynamic Interactive Pins Layer -->
+              <g id="map-pins-layer">
+                <!-- Injected via scripts.js -->
+              </g>
+            </svg>
+
+            <!-- Floating Tooltip -->
+            <div class="map-tooltip" id="map-tooltip"></div>
+          </div>
+
+          <div class="map-legend">
+            <span style="font-size: 10px; color: var(--text-dim); text-transform: uppercase;">Map Pins Status:</span>
+            <div class="legend-items">
+              <div class="legend-item"><span class="legend-dot critical"></span> Critical</div>
+              <div class="legend-item"><span class="legend-dot high"></span> High Urgency</div>
+              <div class="legend-item"><span class="legend-dot dispatched"></span> Unit Fielded</div>
+              <div class="legend-item"><span class="legend-dot resolved"></span> Resolved</div>
+            </div>
+            <button class="btn btn-secondary" id="btn-clear-sector-filter" style="font-size: 10px; padding: 2px 8px; display: none;">
+              Show All Sectors
+            </button>
+          </div>
+        </section>
+
+        <!-- PANEL 4: PURE VANILLA DATA VISUALIZERS (NO EXTERNAL LIBS) -->
+        <section class="visualizers-grid" aria-label="Disaster Unit Performance Metrics">
+          <!-- Visualizer 1: Multi-Segment Incident Resolution Progress Bar -->
+          <div class="viz-card">
+            <div class="viz-title">
+              <span>Incident Resolution Ratio</span>
+              <span class="viz-metric-lead tabular-nums" id="viz-resolution-percent">0%</span>
+            </div>
+            <div class="incident-progress-bar" title="Incident Resolution Spectrum">
+              <div class="bar-segment resolved" id="bar-resolved" style="width: 0%" title="Resolved"></div>
+              <div class="bar-segment dispatched" id="bar-dispatched" style="width: 0%" title="Dispatched / Active"></div>
+              <div class="bar-segment pending" id="bar-pending" style="width: 100%" title="Pending Dispatch"></div>
+            </div>
+            <div class="viz-stats-row tabular-nums">
+              <div class="viz-stat-pill"><span class="legend-dot resolved"></span> <span id="viz-count-resolved">0</span> Resolved</div>
+              <div class="viz-stat-pill"><span class="legend-dot dispatched"></span> <span id="viz-count-dispatched">0</span> Fielded</div>
+              <div class="viz-stat-pill"><span class="legend-dot critical"></span> <span id="viz-count-pending">0</span> Pending</div>
+            </div>
+          </div>
+
+          <!-- Visualizer 2: Pure SVG Fleet Resource Deployment Dial -->
+          <div class="viz-card">
+            <div class="viz-title">
+              <span>Fleet Deployment Ratio</span>
+              <span class="viz-metric-lead tabular-nums" id="viz-deployment-percent">0%</span>
+            </div>
+            <div class="gauge-wrapper">
+              <div class="gauge-svg-box">
+                <svg viewBox="0 0 40 40" width="100%" height="100%">
+                  <circle class="gauge-circle-bg" cx="20" cy="20" r="15" />
+                  <circle class="gauge-circle-fill" id="gauge-circle-fill" cx="20" cy="20" r="15" stroke-dasharray="94.25" stroke-dashoffset="94.25" />
+                </svg>
+              </div>
+              <div class="gauge-breakdown tabular-nums">
+                <div class="gauge-num-row">
+                  <span style="color: var(--accent-cyan);">Committed:</span>
+                  <strong id="viz-units-committed">0 units</strong>
+                </div>
+                <div class="gauge-num-row">
+                  <span style="color: var(--text-dim);">Ready Reserve:</span>
+                  <strong id="viz-units-reserve">0 units</strong>
+                </div>
+                <div class="gauge-num-row">
+                  <span style="color: var(--text-dim);">Total Fleet:</span>
+                  <span id="viz-units-total" style="color: var(--text-muted);">0 units</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- PANEL 5: DYNAMIC LIVE INCIDENT DISPATCH FEED -->
+        <section class="deck-panel" aria-labelledby="feed-heading">
+          <div class="panel-header">
+            <h2 class="panel-title" id="feed-heading">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="8" y1="6" x2="21" y2="6"></line>
+                <line x1="8" y1="12" x2="21" y2="12"></line>
+                <line x1="8" y1="18" x2="21" y2="18"></line>
+                <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                <line x1="3" y1="18" x2="3.01" y2="18"></line>
+              </svg>
+              Live Incident Dispatch Stream
+            </h2>
+            <span class="panel-title-badge tabular-nums" id="feed-count-badge">0 CALLS</span>
+          </div>
+
+          <div class="panel-body">
+            <!-- Search & Filter Controls -->
+            <div class="feed-controls">
+              <div class="feed-search-row">
+                <div class="search-input-wrap">
+                  <span class="search-icon-placeholder" aria-hidden="true">&#128269;</span>
+                  <input type="text" id="feed-search-input" class="search-input" placeholder="Search by location, caller name, incident ID, or notes..." />
+                </div>
+                <select id="feed-sort-select" class="sort-select" aria-label="Sort Incidents">
+                  <option value="priority">Sort: Severity (High-Low)</option>
+                  <option value="newest">Sort: Newest First</option>
+                  <option value="sector">Sort: By Sector</option>
+                </select>
+              </div>
+
+              <!-- Urgency Segmented Filter Tabs -->
+              <div class="urgency-filter-bar" id="urgency-filter-bar">
+                <button type="button" class="filter-tab active" data-filter="all">All <span class="filter-tab-count tabular-nums" id="filter-cnt-all">(0)</span></button>
+                <button type="button" class="filter-tab" data-filter="critical">Critical <span class="filter-tab-count tabular-nums" id="filter-cnt-critical">(0)</span></button>
+                <button type="button" class="filter-tab" data-filter="high">High <span class="filter-tab-count tabular-nums" id="filter-cnt-high">(0)</span></button>
+                <button type="button" class="filter-tab" data-filter="moderate">Moderate <span class="filter-tab-count tabular-nums" id="filter-cnt-moderate">(0)</span></button>
+                <button type="button" class="filter-tab" data-filter="dispatched">Fielded <span class="filter-tab-count tabular-nums" id="filter-cnt-dispatched">(0)</span></button>
+                <button type="button" class="filter-tab" data-filter="resolved">Resolved <span class="filter-tab-count tabular-nums" id="filter-cnt-resolved">(0)</span></button>
+              </div>
+            </div>
+
+            <!-- Scrollable Incident Cards Stream -->
+            <div class="incidents-stream" id="incidents-stream">
+              <!-- Rendered dynamically via scripts.js -->
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+
+    <!-- MODAL: CALL FOR BACKUP FORCES -->
+    <div class="modal-overlay" id="backup-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-card">
+        <div class="modal-header">
+          <div class="modal-title" id="modal-title">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ef4444" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+              <line x1="12" y1="9" x2="12" y2="13"></line>
+              <line x1="12" y1="17" x2="12.01" y2="17"></line>
+            </svg>
+            Requisition Emergency Backup Forces
+          </div>
+          <button class="btn-close-modal" id="btn-close-modal" aria-label="Close modal">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p class="modal-desc">
+            Authorize emergency state mutual-aid deployment to replenish depleted medical teams, rescue craft, and heavy logistics vehicles. Units deploy instantly to ready reserve.
+          </p>
+          <div class="backup-packages">
+            <div class="package-card" data-package="paramedics">
+              <div>
+                <div class="package-name">State Paramedic Task Force</div>
+                <div class="package-desc">Triage trauma units with rapid ALS ambulances.</div>
+              </div>
+              <div class="package-yield">+4 Paramedic Teams</div>
+              <button class="btn btn-primary" style="margin-top: 8px;">Requisition Units</button>
+            </div>
+
+            <div class="package-card" data-package="rescueVehicles">
+              <div>
+                <div class="package-name">Swift-Water & 4x4 Fleet</div>
+                <div class="package-desc">Rigid hull inflatable boats & heavy off-roaders.</div>
+              </div>
+              <div class="package-yield">+3 Rescue Craft / 4x4s</div>
+              <button class="btn btn-primary" style="margin-top: 8px;">Requisition Units</button>
+            </div>
+
+            <div class="package-card" data-package="heavyAirSupport">
+              <div>
+                <div class="package-name">National Guard Air Wing</div>
+                <div class="package-desc">Heavy lift helicopters and tactical cargo trucks.</div>
+              </div>
+              <div class="package-yield">+2 Helos & Trucks</div>
+              <button class="btn btn-primary" style="margin-top: 8px;">Requisition Units</button>
+            </div>
+
+            <div class="package-card" data-package="combinedSurge">
+              <div>
+                <div class="package-name">Full Regional Strike Group</div>
+                <div class="package-desc">Multi-tier joint emergency disaster relief battalion.</div>
+              </div>
+              <div class="package-yield">+3 Meds · +2 Craft · +2 Air</div>
+              <button class="btn btn-backup" style="margin-top: 8px;">Authorize Surge</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+    <!-- PURE VANILLA SCRIPTS (No external modules) -->
+    <script src="/scripts.js"></script>
+  </body>
+</html>

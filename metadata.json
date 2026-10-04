@@ -1,0 +1,6 @@
+{
+  "name": "DISPATCH-OPS Disaster Response Command",
+  "description": "Tactical operational dashboard for disaster response units to log incoming distress calls, dispatch relief vehicles and medical teams, track live resources, request backup forces, and monitor real-time sector emergency status.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
